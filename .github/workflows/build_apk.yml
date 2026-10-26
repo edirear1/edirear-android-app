@@ -19,29 +19,29 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
       - name: Build Android APK
+        env:
+          ANDROID_HOME: /usr/local/lib/android/sdk
+          ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
         run: |
-          # If files are inside a subfolder, move into it
+          # Automatically find and enter the project folder if nested
           if [ ! -f "settings.gradle" ]; then
             SUBDIR=$(find . -maxdepth 2 -name "settings.gradle" -exec dirname {} \;)
             if [ -n "$SUBDIR" ]; then
-              echo "Entering $SUBDIR"
               cd "$SUBDIR"
             fi
           fi
 
-          # Link Android SDK
           echo "sdk.dir=$ANDROID_HOME" > local.properties
 
-          # Download Gradle 8.2 and give it execution permission
+          # Accept Android licenses
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses 2>/dev/null || true
+
+          # Download and run Gradle 8.2
           wget -q https://services.gradle.org/distributions/gradle-8.2-bin.zip
           unzip -q -o gradle-8.2-bin.zip
           chmod +x ./gradle-8.2/bin/gradle
 
-          # Build APK
           ./gradle-8.2/bin/gradle assembleDebug --stacktrace
 
       - name: Upload APK Artifact
