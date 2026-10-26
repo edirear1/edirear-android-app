@@ -10,7 +10,7 @@ public class Config {
      * Local Wi-Fi Testing: "http://192.168.1.X:5000" (replace X with your PC's local IP)
      * Android Emulator Testing: "http://10.0.2.2:5000"
      */
-    public static final String DEFAULT_URL = "https://edirear.com";
+    public static final String DEFAULT_URL = " http://192.168.10.6:5000";
 
     // Application identifier
     public static final String APP_NAME = "Edirear";
