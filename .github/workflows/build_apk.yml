@@ -22,15 +22,31 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Download & Run Gradle
+      - name: Build Android APK
         run: |
+          # If files are inside a subfolder, move into it
+          if [ ! -f "settings.gradle" ]; then
+            SUBDIR=$(find . -maxdepth 2 -name "settings.gradle" -exec dirname {} \;)
+            if [ -n "$SUBDIR" ]; then
+              echo "Entering $SUBDIR"
+              cd "$SUBDIR"
+            fi
+          fi
+
+          # Link Android SDK
+          echo "sdk.dir=$ANDROID_HOME" > local.properties
+
+          # Download Gradle 8.2 and give it execution permission
           wget -q https://services.gradle.org/distributions/gradle-8.2-bin.zip
-          unzip -q gradle-8.2-bin.zip
+          unzip -q -o gradle-8.2-bin.zip
+          chmod +x ./gradle-8.2/bin/gradle
+
+          # Build APK
           ./gradle-8.2/bin/gradle assembleDebug --stacktrace
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: edirear-app-debug.apk
-          path: app/build/outputs/apk/debug/app-debug.apk
+          path: "**/app/build/outputs/apk/debug/*.apk"
           retention-days: 14
